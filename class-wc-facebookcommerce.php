@@ -265,7 +265,10 @@ class WC_Facebookcommerce extends WooCommerce\Facebook\Framework\Plugin {
 			if ( is_admin() ) {
 				require_once __DIR__ . '/includes/Admin/OminiFlow/Branding.php';
 				require_once __DIR__ . '/includes/Admin/OminiFlow/Admin_Branding.php';
+				require_once __DIR__ . '/includes/Admin/OminiFlow/Auth_Config.php';
+				require_once __DIR__ . '/includes/Admin/OminiFlow/Integration_Bootstrap.php';
 				\WooCommerce\Facebook\Admin\OminiFlow\Admin_Branding::init();
+				\WooCommerce\Facebook\Admin\OminiFlow\Integration_Bootstrap::init();
 
 				if ( $this->use_enhanced_onboarding() ) {
 					$this->admin_enhanced_settings = new WooCommerce\Facebook\Admin\Enhanced_Settings( $this );

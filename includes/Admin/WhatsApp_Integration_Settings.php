@@ -12,6 +12,7 @@ namespace WooCommerce\Facebook\Admin;
 
 use WooCommerce\Facebook\Framework\Logger;
 use WooCommerce\Facebook\Framework\Helper;
+use WooCommerce\Facebook\Admin\OminiFlow\Auth_Gate;
 use WooCommerce\Facebook\Admin\OminiFlow\Branding;
 use WooCommerce\Facebook\Admin\OminiFlow\Onboarding_Shell;
 use Automattic\WooCommerce\Admin\Features\Features as WooAdminFeatures;
@@ -90,6 +91,25 @@ class WhatsApp_Integration_Settings {
 			array( 'wc-ominiflow-onboarding' ),
 			\WC_Facebookcommerce::VERSION
 		);
+
+		$whatsapp_connection = $this->plugin->get_whatsapp_connection_handler();
+		$is_connected        = $whatsapp_connection->is_connected();
+
+		if ( ! $is_connected || Auth_Gate::should_show_whatsapp_auth_gate( $is_connected ) ) {
+			wp_enqueue_script(
+				'wc-ominiflow-onboarding',
+				facebook_for_woocommerce()->get_plugin_url() . '/assets/js/admin/ominiflow-onboarding.js',
+				array( 'jquery' ),
+				\WC_Facebookcommerce::VERSION,
+				true
+			);
+
+			wp_localize_script(
+				'wc-ominiflow-onboarding',
+				'wc_ominiflow_onboarding',
+				Onboarding_Shell::get_script_data( 'whatsapp' )
+			);
+		}
 	}
 
 
@@ -236,6 +256,12 @@ class WhatsApp_Integration_Settings {
 		if ( empty( $iframe_url ) ) {
 			return $this->error_banner();
 		}
+
+		if ( $is_connected ) {
+			Onboarding_Shell::render_whatsapp_workspace( $iframe_url, true );
+			return;
+		}
+
 		Onboarding_Shell::render_whatsapp_workspace( $iframe_url );
 	}
 

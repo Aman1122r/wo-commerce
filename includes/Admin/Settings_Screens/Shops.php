@@ -26,6 +26,7 @@ require_once __DIR__ . '/../OminiFlow/Auth_Client.php';
 require_once __DIR__ . '/../OminiFlow/Auth_Gate.php';
 require_once __DIR__ . '/../OminiFlow/Branding.php';
 require_once __DIR__ . '/../OminiFlow/Onboarding_Shell.php';
+require_once __DIR__ . '/../OminiFlow/Integration_Bootstrap.php';
 
 /**
  * Shops settings screen object.
@@ -57,7 +58,6 @@ class Shops extends Abstract_Settings_Screen {
 	 * @since 3.5.0
 	 */
 	public function __construct() {
-		Auth_Gate::init();
 		add_action( 'init', array( $this, 'initHook' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_notices', array( $this, 'add_notices' ) );
@@ -197,7 +197,7 @@ class Shops extends Abstract_Settings_Screen {
 			wp_localize_script(
 				'wc-ominiflow-onboarding',
 				'wc_ominiflow_onboarding',
-				Onboarding_Shell::get_script_data()
+				Onboarding_Shell::get_script_data( 'meta' )
 			);
 		}
 	}

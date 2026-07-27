@@ -13,6 +13,9 @@ namespace WooCommerce\Facebook\Admin\OminiFlow;
 
 defined( 'ABSPATH' ) || exit;
 
+require_once __DIR__ . '/Auth_Config.php';
+require_once __DIR__ . '/Integrations_Config.php';
+
 /**
  * Handles OminiFlow signup/login gate state for the Shops onboarding screen.
  */
@@ -65,6 +68,24 @@ class Auth_Gate {
 		);
 
 		if ( ! $show_gate ) {
+			return false;
+		}
+
+		return ! self::is_authenticated();
+	}
+
+	/**
+	 * Whether the OminiFlow auth gate should appear on the WhatsApp screen.
+	 *
+	 * @param bool $is_connected WhatsApp connection state.
+	 * @return bool
+	 */
+	public static function should_show_whatsapp_auth_gate( bool $is_connected ): bool {
+		if ( $is_connected ) {
+			return false;
+		}
+
+		if ( ! Integrations_Config::is_credential_sync_enabled() ) {
 			return false;
 		}
 

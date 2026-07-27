@@ -16,6 +16,10 @@
 	const metaPanel = document.getElementById( 'ominiflow-meta-panel' );
 	const signupForm = document.getElementById( 'ominiflow-signup-form' );
 	const loginForm = document.getElementById( 'ominiflow-login-form' );
+	const connectPanel = document.getElementById( 'ominiflow-connect-ominiflow-panel' );
+	const connectMessage = document.getElementById( 'ominiflow-connect-ominiflow-message' );
+	const connectLink = document.getElementById( 'ominiflow-connect-ominiflow-link' );
+	const context = config.context || root.getAttribute( 'data-ominiflow-context' ) || 'meta';
 
 	function switchView( view ) {
 		root.querySelectorAll( '[data-ominiflow-view]' ).forEach( function ( tab ) {
@@ -41,6 +45,33 @@
 		errorEl.hidden = ! message;
 	}
 
+	function hideConnectPanel() {
+		if ( connectPanel ) {
+			connectPanel.hidden = true;
+		}
+	}
+
+	function showConnectPanel( message, url ) {
+		revealMetaPanel();
+
+		if ( connectMessage ) {
+			connectMessage.textContent = message || config.i18n.connect_on_ominiflow;
+		}
+
+		if ( connectLink ) {
+			connectLink.href = url || config.connect_meta_url || '#';
+		}
+
+		if ( connectPanel ) {
+			connectPanel.hidden = false;
+		}
+
+		const iframeWrap = metaPanel ? metaPanel.querySelector( '.ominiflow-onboarding__iframe-wrap' ) : null;
+		if ( iframeWrap ) {
+			iframeWrap.style.display = 'none';
+		}
+	}
+
 	function revealMetaPanel() {
 		if ( authPanel ) {
 			authPanel.classList.add( 'is-hidden' );
@@ -52,7 +83,7 @@
 			metaPanel.setAttribute( 'aria-hidden', 'false' );
 
 			const iframeWrap = metaPanel.querySelector( '.ominiflow-onboarding__iframe-wrap' );
-			const iframe = document.getElementById( 'facebook-commerce-iframe-enhanced' );
+			const iframe = metaPanel.querySelector( 'iframe' );
 
 			if ( iframeWrap ) {
 				iframeWrap.style.display = 'block';
@@ -62,6 +93,89 @@
 				iframe.style.display = 'block';
 			}
 		}
+	}
+
+	function isCompleteForContext( syncData ) {
+		if ( context === 'whatsapp' ) {
+			return !! syncData.whatsapp_complete;
+		}
+
+		return !! syncData.meta_complete;
+	}
+
+	function syncCredentials() {
+		if ( ! config.credential_sync_enabled || ! config.sync_action ) {
+			return Promise.resolve( { use_meta_iframe: true } );
+		}
+
+		const formData = new FormData();
+		formData.append( 'action', config.sync_action );
+		formData.append( 'nonce', config.nonce );
+
+		return fetch( config.ajax_url, {
+			method: 'POST',
+			credentials: 'same-origin',
+			body: formData,
+		} )
+			.then( function ( response ) {
+				return response.json().then( function ( body ) {
+					return {
+						ok: response.ok,
+						body: body,
+					};
+				} );
+			} )
+			.then( function ( result ) {
+				if ( ! result.ok || ! result.body.success ) {
+					const message =
+						( result.body && result.body.data && result.body.data.message ) ||
+						config.i18n.generic_error;
+					throw new Error( message );
+				}
+
+				return result.body.data || {};
+			} );
+	}
+
+	function handlePostAuthSuccess( submitButton, loadingText ) {
+		if ( submitButton ) {
+			submitButton.disabled = true;
+			submitButton.textContent = config.i18n.syncing_credentials || loadingText;
+		}
+
+		return syncCredentials()
+			.then( function ( syncData ) {
+				if ( syncData.use_meta_iframe ) {
+					hideConnectPanel();
+					revealMetaPanel();
+					return;
+				}
+
+				if ( syncData.meta_connected === false && syncData.whatsapp_connected === false ) {
+					showConnectPanel( syncData.message, syncData.connect_url );
+					return;
+				}
+
+				if ( isCompleteForContext( syncData ) ) {
+					window.location.reload();
+					return;
+				}
+
+				hideConnectPanel();
+				revealMetaPanel();
+			} )
+			.catch( function ( error ) {
+				showError(
+					context === 'whatsapp' ? 'ominiflow-login-error' : 'ominiflow-login-error',
+					error.message || config.i18n.generic_error
+				);
+			} )
+			.finally( function () {
+				if ( submitButton ) {
+					submitButton.disabled = false;
+					submitButton.textContent = submitButton.dataset.originalText;
+				}
+			} );
 	}
 
 	function postAuth( action, formData, errorElementId, loadingText, submitButton ) {
@@ -102,7 +216,7 @@
 					throw new Error( message );
 				}
 
-				revealMetaPanel();
+				return handlePostAuthSuccess( submitButton, loadingText );
 			} )
 			.catch( function ( error ) {
 				showError( errorElementId, error.message || config.i18n.generic_error );

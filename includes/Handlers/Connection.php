@@ -590,6 +590,11 @@ class Connection {
 		if ( class_exists( 'WC_Facebookcommerce_Pixel' ) ) {
 			delete_option( \WC_Facebookcommerce_Pixel::SETTINGS_KEY );
 		}
+
+		/**
+		 * Fires after the Meta connection is disconnected locally.
+		 */
+		do_action( 'wc_facebook_disconnected' );
 	}
 
 
