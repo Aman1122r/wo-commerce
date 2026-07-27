@@ -11,6 +11,7 @@
 namespace WooCommerce\Facebook;
 
 use WooCommerce\Facebook\Admin\Enhanced_Catalog_Attribute_Fields;
+use WooCommerce\Facebook\Admin\OminiFlow\Branding;
 use WooCommerce\Facebook\Framework\Helper;
 use WooCommerce\Facebook\ProductAttributeMapper;
 use WooCommerce\Facebook\RolloutSwitches;
@@ -892,7 +893,7 @@ class Admin {
 	public function add_product_settings_tab( $tabs ) {
 
 		$tabs['fb_commerce_tab'] = array(
-			'label'  => __( 'Facebook', 'facebook-for-woocommerce' ),
+			'label'  => Branding::product_tab_label(),
 			'target' => 'facebook_options',
 			'class'  => array( 'show_if_simple', 'show_if_variable', 'show_if_external' ),
 		);
@@ -1067,7 +1068,7 @@ class Admin {
 				woocommerce_wp_select(
 					array(
 						'id'          => 'wc_facebook_sync_mode',
-						'label'       => __( 'Facebook Sync', 'facebook-for-woocommerce' ),
+						'label'       => Branding::catalog_sync_label(),
 						'options'     => array(
 							self::SYNC_MODE_SYNC_AND_SHOW => __( 'Sync and show in catalog', 'facebook-for-woocommerce' ),
 							self::SYNC_MODE_SYNC_AND_HIDE => __( 'Sync and hide in catalog', 'facebook-for-woocommerce' ),
@@ -1371,7 +1372,7 @@ class Admin {
 		?>
 		<div class="facebook-metabox wc-metabox closed">
 			<h3>
-				<strong><?php esc_html_e( 'Meta for WooCommerce', 'facebook-for-woocommerce' ); ?></strong>
+				<strong><?php echo esc_html( Branding::plugin_name() ); ?></strong>
 				<div class="handlediv" aria-label="<?php esc_attr_e( 'Click to toggle', 'facebook-for-woocommerce' ); ?>"></div>
 			</h3>
 			<div class="wc-metabox-content" style="display: none;">
@@ -1821,7 +1822,7 @@ class Admin {
 				<div class="wc-backbone-modal-content">
 					<section class="wc-backbone-modal-main" role="main">
 						<header class="wc-backbone-modal-header">
-							<h1><?php esc_html_e( 'Meta for WooCommerce', 'facebook-for-woocommerce' ); ?></h1>
+							<h1><?php echo esc_html( Branding::plugin_name() ); ?></h1>
 							<button class="modal-close modal-close-link dashicons dashicons-no-alt">
 								<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'facebook-for-woocommerce' ); ?></span>
 							</button>

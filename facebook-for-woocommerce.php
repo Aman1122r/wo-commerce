@@ -5,11 +5,11 @@
  * This source code is licensed under the license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * Plugin Name: Meta for WooCommerce
- * Plugin URI: https://github.com/woocommerce/facebook-for-woocommerce/
- * Description: Grow your business on Meta platforms! Use this official plugin to help sell more of your products using Facebook and Instagram. After completing the setup, you'll be ready to create ads that promote your products and you can also create a shop section on your Page where customers can browse your products.
- * Author: Meta
- * Author URI: https://www.meta.com/
+ * Plugin Name: OminiFlow for WooCommerce
+ * Plugin URI: https://ominiflow.com/
+ * Description: Grow your business with OminiFlow — connect WooCommerce to Meta platforms (Facebook, Instagram, WhatsApp). Manage catalogs, ads, and commerce from one unified workspace.
+ * Author: OminiFlow
+ * Author URI: https://ominiflow.com/
  * Version: 3.7.5
  * Requires at least: 5.6
  * Requires PHP: 7.4
@@ -155,7 +155,7 @@ class WC_Facebook_Loader {
 	const FRAMEWORK_VERSION = '5.10.0';
 
 	// The plugin name, for displaying notices.
-	const PLUGIN_NAME = 'Meta for WooCommerce';
+	const PLUGIN_NAME = 'OminiFlow for WooCommerce';
 
 	const PLUGIN_NAME_DNS = 'wordpress.org';
 
@@ -476,7 +476,7 @@ class WC_Facebook_Loader {
 		/* translators: %d: disable window duration in minutes. */
 		$window_label = null === $window_seconds ? esc_html__( 'Permanent (3+ crashes)', 'facebook-for-woocommerce' ) : sprintf( esc_html__( '%d minutes', 'facebook-for-woocommerce' ), (int) round( $window_seconds / MINUTE_IN_SECONDS ) );
 
-		echo '<tr class="plugin-update-tr active wc-facebook-disabled-notice-row"><td colspan="4" class="plugin-update colspanchange"><div class="notice inline notice-warning notice-alt wc-facebook-disabled-notice is-dismissible" data-wc-facebook-disabled-notice="1"><p><strong>' . esc_html__( 'Meta for WooCommerce is currently disabled due to repeated crashes.', 'facebook-for-woocommerce' ) . '</strong></p><p>' . esc_html__( 'You can re-enable the plugin after reviewing recent crash conditions.', 'facebook-for-woocommerce' ) . '</p><p><strong>' . esc_html__( 'Crash count:', 'facebook-for-woocommerce' ) . '</strong> ' . esc_html( (string) $crash_count ) . ' &nbsp; <strong>' . esc_html__( 'Disabled since:', 'facebook-for-woocommerce' ) . '</strong> ' . esc_html( $disabled_since ) . ' &nbsp; <strong>' . esc_html__( 'Disable window:', 'facebook-for-woocommerce' ) . '</strong> ' . esc_html( $window_label ) . ' &nbsp; <strong>' . esc_html__( 'Source:', 'facebook-for-woocommerce' ) . '</strong> ' . esc_html( $source ) . '</p><p><a class="button button-primary" href="' . esc_url( $clear_url ) . '">' . esc_html__( 'Re-enable plugin', 'facebook-for-woocommerce' ) . '</a></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">' . esc_html__( 'Dismiss this notice.', 'facebook-for-woocommerce' ) . '</span></button><input type="hidden" class="wc-facebook-disabled-notice-signature" value="' . esc_attr( $signature ) . '" /></div></td></tr>';
+		echo '<tr class="plugin-update-tr active wc-facebook-disabled-notice-row"><td colspan="4" class="plugin-update colspanchange"><div class="notice inline notice-warning notice-alt wc-facebook-disabled-notice is-dismissible" data-wc-facebook-disabled-notice="1"><p><strong>' . esc_html( sprintf( __( '%s is currently disabled due to repeated crashes.', 'facebook-for-woocommerce' ), self::PLUGIN_NAME ) ) . '</strong></p><p>' . esc_html__( 'You can re-enable the plugin after reviewing recent crash conditions.', 'facebook-for-woocommerce' ) . '</p><p><strong>' . esc_html__( 'Crash count:', 'facebook-for-woocommerce' ) . '</strong> ' . esc_html( (string) $crash_count ) . ' &nbsp; <strong>' . esc_html__( 'Disabled since:', 'facebook-for-woocommerce' ) . '</strong> ' . esc_html( $disabled_since ) . ' &nbsp; <strong>' . esc_html__( 'Disable window:', 'facebook-for-woocommerce' ) . '</strong> ' . esc_html( $window_label ) . ' &nbsp; <strong>' . esc_html__( 'Source:', 'facebook-for-woocommerce' ) . '</strong> ' . esc_html( $source ) . '</p><p><a class="button button-primary" href="' . esc_url( $clear_url ) . '">' . esc_html__( 'Re-enable plugin', 'facebook-for-woocommerce' ) . '</a></p><button type="button" class="notice-dismiss"><span class="screen-reader-text">' . esc_html__( 'Dismiss this notice.', 'facebook-for-woocommerce' ) . '</span></button><input type="hidden" class="wc-facebook-disabled-notice-signature" value="' . esc_attr( $signature ) . '" /></div></td></tr>';
 	}
 
 	/**

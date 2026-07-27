@@ -14,6 +14,9 @@ defined( 'ABSPATH' ) || exit;
  */
 class Auth_Config {
 
+	/** @var string Default OminiFlow auth API base URL. */
+	const DEFAULT_AUTH_API_BASE_URL = 'https://whatsapp.ominiflow.com/api/v1/auth';
+
 	/**
 	 * Whether OminiFlow authentication is configured for production use.
 	 *
@@ -48,7 +51,7 @@ class Auth_Config {
 		 *
 		 * @param string $base_url Default empty.
 		 */
-		return trim( (string) apply_filters( 'wc_ominiflow_auth_api_base_url', '' ) );
+		return trim( (string) apply_filters( 'wc_ominiflow_auth_api_base_url', self::DEFAULT_AUTH_API_BASE_URL ) );
 	}
 
 	/**

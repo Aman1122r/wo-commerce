@@ -12,6 +12,8 @@ namespace WooCommerce\Facebook\Admin;
 
 use Automattic\WooCommerce\Admin\Features\Features as WooAdminFeatures;
 use WooCommerce\Facebook\Admin\Settings_Screens;
+use WooCommerce\Facebook\Admin\OminiFlow\Admin_Branding;
+use WooCommerce\Facebook\Admin\OminiFlow\Branding;
 use WooCommerce\Facebook\Framework\Helper;
 use WooCommerce\Facebook\Framework\Plugin\Exception as PluginException;
 use WooCommerce\Facebook\RolloutSwitches;
@@ -112,8 +114,8 @@ class Enhanced_Settings {
 
 		add_submenu_page(
 			$root_menu_item,
-			__( 'Meta for WooCommerce', 'facebook-for-woocommerce' ),
-			__( 'Facebook', 'facebook-for-woocommerce' ),
+			Branding::plugin_name(),
+			Branding::menu_label(),
 			'manage_woocommerce',
 			self::PAGE_ID,
 			[ $this, 'render' ],
@@ -168,7 +170,7 @@ class Enhanced_Settings {
 					'id'        => self::PAGE_ID,
 					'screen_id' => $screen_id,
 					'path'      => add_query_arg( 'page', self::PAGE_ID, 'admin.php' ),
-					'title'     => [ __( 'Meta for WooCommerce', 'facebook-for-woocommerce' ) ],
+					'title'     => [ Branding::plugin_name() ],
 				)
 			);
 		}
@@ -198,6 +200,11 @@ class Enhanced_Settings {
 
 		?>
 		<div class="wrap woocommerce">
+			<?php
+			if ( Settings_Screens\Shops::ID !== $current_tab ) {
+				Admin_Branding::render_settings_header();
+			}
+			?>
 			<?php $this->render_tabs( $current_tab ); ?>
 			<?php facebook_for_woocommerce()->get_message_handler()->show_messages(); ?>
 			<?php if ( $screen ) : ?>

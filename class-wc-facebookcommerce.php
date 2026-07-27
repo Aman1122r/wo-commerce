@@ -263,6 +263,10 @@ class WC_Facebookcommerce extends WooCommerce\Facebook\Framework\Plugin {
 
 			// load admin handlers, before admin_init
 			if ( is_admin() ) {
+				require_once __DIR__ . '/includes/Admin/OminiFlow/Branding.php';
+				require_once __DIR__ . '/includes/Admin/OminiFlow/Admin_Branding.php';
+				\WooCommerce\Facebook\Admin\OminiFlow\Admin_Branding::init();
+
 				if ( $this->use_enhanced_onboarding() ) {
 					$this->admin_enhanced_settings = new WooCommerce\Facebook\Admin\Enhanced_Settings( $this );
 				} else {
@@ -714,7 +718,7 @@ class WC_Facebookcommerce extends WooCommerce\Facebook\Framework\Plugin {
 	 * @return string
 	 */
 	public function get_plugin_name() {
-		return __( 'Meta for WooCommerce', 'facebook-for-woocommerce' );
+		return \WooCommerce\Facebook\Admin\OminiFlow\Branding::plugin_name();
 	}
 
 	/**
@@ -836,7 +840,7 @@ class WC_Facebookcommerce extends WooCommerce\Facebook\Framework\Plugin {
 
 		$message = sprintf(
 			/* translators: %1$s - <strong>, %2$s - </strong>, %3$s - <a> reconnect link, %4$s - </a>, %5$s - <a> support link, %6$s - </a> */
-			__( '%1$sMeta for WooCommerce connection error.%2$s Your access token is no longer valid. This may happen if the system user was unconfirmed, the password was changed, or the app was deauthorized. Please %3$sreconnect your store%4$s to restore functionality, or %5$scontact support%6$s for help.', 'facebook-for-woocommerce' ),
+			__( '%1$sOminiFlow connection error.%2$s Your access token is no longer valid. This may happen if the system user was unconfirmed, the password was changed, or the app was deauthorized. Please %3$sreconnect your store%4$s to restore functionality, or %5$scontact support%6$s for help.', 'facebook-for-woocommerce' ),
 			'<strong>',
 			'</strong>',
 			'<a href="' . esc_url( $this->get_settings_url() ) . '">',

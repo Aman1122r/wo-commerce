@@ -12,6 +12,9 @@ namespace WooCommerce\Facebook\Admin;
 
 use WooCommerce\Facebook\Framework\Logger;
 use WooCommerce\Facebook\Framework\Helper;
+use WooCommerce\Facebook\Admin\OminiFlow\Branding;
+use WooCommerce\Facebook\Admin\OminiFlow\Onboarding_Shell;
+use Automattic\WooCommerce\Admin\Features\Features as WooAdminFeatures;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -73,6 +76,20 @@ class WhatsApp_Integration_Settings {
 		}
 
 		wp_enqueue_style( 'wc-facebook-admin-whatsapp-enhanced', facebook_for_woocommerce()->get_plugin_url() . '/assets/css/admin/facebook-for-woocommerce-whatsapp-enhanced.css', array(), \WC_Facebookcommerce::VERSION );
+
+		wp_enqueue_style(
+			'wc-ominiflow-onboarding',
+			facebook_for_woocommerce()->get_plugin_url() . '/assets/css/admin/ominiflow-onboarding.css',
+			array(),
+			\WC_Facebookcommerce::VERSION
+		);
+
+		wp_enqueue_style(
+			'wc-ominiflow-admin-branding',
+			facebook_for_woocommerce()->get_plugin_url() . '/assets/css/admin/ominiflow-admin-branding.css',
+			array( 'wc-ominiflow-onboarding' ),
+			\WC_Facebookcommerce::VERSION
+		);
 	}
 
 
@@ -91,8 +108,8 @@ class WhatsApp_Integration_Settings {
 	public function add_menu_item() {
 
 		add_menu_page(
-			__( 'WhatsApp for WooCommerce', 'facebook-for-woocommerce' ),
-			__( 'WhatsApp', 'facebook-for-woocommerce' ),
+			Branding::whatsapp_page_title(),
+			Branding::whatsapp_menu_label(),
 			'manage_woocommerce',
 			self::PAGE_ID,
 			[ $this, 'render' ],
@@ -150,7 +167,7 @@ class WhatsApp_Integration_Settings {
 					'id'        => self::PAGE_ID,
 					'screen_id' => $screen_id,
 					'path'      => add_query_arg( 'page', self::PAGE_ID, 'admin.php' ),
-					'title'     => [ __( 'WhatsApp for WooCommerce', 'facebook-for-woocommerce' ) ],
+					'title'     => [ Branding::whatsapp_page_title() ],
 				)
 			);
 		}
@@ -219,22 +236,15 @@ class WhatsApp_Integration_Settings {
 		if ( empty( $iframe_url ) ) {
 			return $this->error_banner();
 		}
-		?>
-		<div class="facebook-whatsapp-iframe-container">
-			<iframe
-				id="facebook-whatsapp-iframe-enhanced"
-				src="<?php echo esc_url( $iframe_url ); ?>"
-				></iframe>
-		</div>
-		<?php
+		Onboarding_Shell::render_whatsapp_workspace( $iframe_url );
 	}
 
 	private function error_banner() {
 		?>
 		<div class="facebook-whatsapp-iframe-error-container">
 			<div class="notice notice-error" style="margin: 0; padding-bottom: 20px;">
-				<h3><?php esc_html_e( 'WhatsApp Utility Connection Error', 'facebook-for-woocommerce' ); ?></h3>
-				<p><?php esc_html_e( 'There was an error loading the WhatsApp Utility Message Integration. Please try reloading the page or resetting your settings.', 'facebook-for-woocommerce' ); ?></p>
+				<h3><?php echo esc_html( sprintf( __( '%s WhatsApp Connection Error', 'facebook-for-woocommerce' ), Branding::short_name() ) ); ?></h3>
+				<p><?php esc_html_e( 'There was an error loading the WhatsApp integration in OminiFlow. Please try reloading the page or resetting your settings.', 'facebook-for-woocommerce' ); ?></p>
 				<div style="margin-top: 15px;">
 					<button
 						type="button"

@@ -12,6 +12,7 @@ namespace WooCommerce\Facebook\Admin\Tasks;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
+use WooCommerce\Facebook\Admin\OminiFlow\Branding;
 
 /**
  * Setup Task class.
@@ -33,7 +34,11 @@ class Setup extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Advertise your products across Meta\'s platforms, including Facebook, Instagram, and WhatsApp', 'facebook-for-woocommerce' );
+		return sprintf(
+			/* translators: %s: OminiFlow brand name */
+			__( 'Connect your store with %s and advertise on Meta platforms (Facebook, Instagram, WhatsApp)', 'facebook-for-woocommerce' ),
+			Branding::short_name()
+		);
 	}
 
 	/**

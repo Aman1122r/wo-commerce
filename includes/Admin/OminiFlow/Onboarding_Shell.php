@@ -9,6 +9,8 @@ namespace WooCommerce\Facebook\Admin\OminiFlow;
 
 defined( 'ABSPATH' ) || exit;
 
+require_once __DIR__ . '/Branding.php';
+
 /**
  * Renders OminiFlow-branded signup/login shell around the Meta iframe.
  */
@@ -94,26 +96,22 @@ class Onboarding_Shell {
 	 *
 	 * @param string $iframe_url Meta Commerce Partner Hub iframe URL.
 	 */
-	public static function render( string $iframe_url ): void {
-		$logo_url             = self::get_logo_url();
-		$show_meta_panel      = Auth_Gate::is_authenticated();
-		$auth_configured      = Auth_Config::is_configured();
-		$has_forgot_password  = Auth_Config::has_forgot_password_url();
+	public static function render_marketing_column( string $context = 'meta' ): void {
+		$logo_url              = self::get_logo_url();
 		$logo_includes_tagline = self::logo_includes_tagline();
+		$is_whatsapp           = 'whatsapp' === $context;
 		?>
-	<div class="ominiflow-onboarding" id="ominiflow-onboarding-root">
-		<div class="ominiflow-onboarding__inner">
 			<div class="ominiflow-onboarding__marketing">
 				<div class="ominiflow-onboarding__brand">
 					<?php if ( '' !== $logo_url ) : ?>
 					<img
 						class="ominiflow-onboarding__logo<?php echo $logo_includes_tagline ? ' ominiflow-onboarding__logo--official' : ''; ?>"
 						src="<?php echo esc_url( $logo_url ); ?>"
-						alt="<?php esc_attr_e( 'OminiFlow', 'facebook-for-woocommerce' ); ?>"
+						alt="<?php echo esc_attr( Branding::short_name() ); ?>"
 					/>
 					<?php endif; ?>
 					<?php if ( ! $logo_includes_tagline ) : ?>
-					<p class="ominiflow-onboarding__tagline"><?php esc_html_e( 'easy, smarter, endless', 'facebook-for-woocommerce' ); ?></p>
+					<p class="ominiflow-onboarding__tagline"><?php echo esc_html( Branding::tagline() ); ?></p>
 					<?php endif; ?>
 				</div>
 
@@ -127,18 +125,48 @@ class Onboarding_Shell {
 				</div>
 
 				<h2 class="ominiflow-onboarding__heading">
-					<?php esc_html_e( 'Create your SaaS workspace in minutes.', 'facebook-for-woocommerce' ); ?>
+					<?php
+					echo $is_whatsapp
+						? esc_html__( 'Connect WhatsApp to your OminiFlow workspace.', 'facebook-for-woocommerce' )
+						: esc_html__( 'Create your SaaS workspace in minutes.', 'facebook-for-woocommerce' );
+					?>
 				</h2>
 				<p class="ominiflow-onboarding__description">
-					<?php esc_html_e( 'Connect WooCommerce to Meta with OminiFlow — manage catalogs, ads, and WhatsApp from one streamlined workspace.', 'facebook-for-woocommerce' ); ?>
+					<?php
+					echo $is_whatsapp
+						? esc_html__( 'Use OminiFlow to connect WhatsApp Business messaging with your WooCommerce store and Meta catalog.', 'facebook-for-woocommerce' )
+						: esc_html__( 'Connect WooCommerce to Meta with OminiFlow — manage catalogs, ads, and WhatsApp from one streamlined workspace.', 'facebook-for-woocommerce' );
+					?>
 				</p>
 
 				<ul class="ominiflow-onboarding__features">
+					<?php if ( $is_whatsapp ) : ?>
+					<li><?php esc_html_e( 'WhatsApp order updates and customer messaging', 'facebook-for-woocommerce' ); ?></li>
+					<li><?php esc_html_e( 'Partner-approved Meta integration', 'facebook-for-woocommerce' ); ?></li>
+					<li><?php esc_html_e( 'Managed from your OminiFlow workspace', 'facebook-for-woocommerce' ); ?></li>
+					<?php else : ?>
 					<li><?php esc_html_e( 'Unified Meta & WhatsApp commerce setup', 'facebook-for-woocommerce' ); ?></li>
 					<li><?php esc_html_e( 'Secure, partner-approved onboarding flow', 'facebook-for-woocommerce' ); ?></li>
 					<li><?php esc_html_e( 'Sync products, coupons, and shipping profiles', 'facebook-for-woocommerce' ); ?></li>
+					<?php endif; ?>
 				</ul>
 			</div>
+		<?php
+	}
+
+	/**
+	 * Renders the full onboarding shell with auth panel and hidden Meta iframe.
+	 *
+	 * @param string $iframe_url Meta Commerce Partner Hub iframe URL.
+	 */
+	public static function render( string $iframe_url ): void {
+		$show_meta_panel     = Auth_Gate::is_authenticated();
+		$auth_configured     = Auth_Config::is_configured();
+		$has_forgot_password = Auth_Config::has_forgot_password_url();
+		?>
+	<div class="ominiflow-onboarding" id="ominiflow-onboarding-root">
+		<div class="ominiflow-onboarding__inner">
+			<?php self::render_marketing_column( 'meta' ); ?>
 
 			<div class="ominiflow-onboarding__panel">
 				<div
@@ -329,14 +357,42 @@ class Onboarding_Shell {
 	 *
 	 * @param string $iframe_url Iframe source URL.
 	 */
-	public static function render_connected_iframe( string $iframe_url ): void {
+	public static function render_workspace( string $iframe_url ): void {
 		?>
-	<div style="display: flex; justify-content: center; max-width: 1200px; margin: 0 auto;">
-		<iframe
-			id="facebook-commerce-iframe-enhanced"
-			src="<?php echo esc_url( $iframe_url ); ?>"
-		></iframe>
+	<div class="ominiflow-onboarding ominiflow-onboarding--workspace" id="ominiflow-onboarding-root">
+		<div class="ominiflow-onboarding__inner">
+			<?php self::render_marketing_column( 'meta' ); ?>
+			<div class="ominiflow-onboarding__panel">
+				<div class="ominiflow-onboarding__meta is-visible" id="ominiflow-meta-panel" aria-hidden="false">
+					<?php self::render_iframe( $iframe_url, false ); ?>
+				</div>
+			</div>
+		</div>
 	</div>
 		<?php
+	}
+
+	public static function render_whatsapp_workspace( string $iframe_url ): void {
+		?>
+	<div class="ominiflow-onboarding ominiflow-onboarding--workspace ominiflow-onboarding--whatsapp" id="ominiflow-whatsapp-root">
+		<div class="ominiflow-onboarding__inner">
+			<?php self::render_marketing_column( 'whatsapp' ); ?>
+			<div class="ominiflow-onboarding__panel">
+				<div class="ominiflow-onboarding__meta is-visible" aria-hidden="false">
+					<div class="ominiflow-onboarding__iframe-wrap">
+						<iframe
+							id="facebook-whatsapp-iframe-enhanced"
+							src="<?php echo esc_url( $iframe_url ); ?>"
+						></iframe>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+		<?php
+	}
+
+	public static function render_connected_iframe( string $iframe_url ): void {
+		self::render_workspace( $iframe_url );
 	}
 }

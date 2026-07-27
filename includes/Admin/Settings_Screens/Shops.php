@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 
 use WooCommerce\Facebook\Admin\Abstract_Settings_Screen;
 use WooCommerce\Facebook\Admin\OminiFlow\Auth_Gate;
+use WooCommerce\Facebook\Admin\OminiFlow\Branding;
 use WooCommerce\Facebook\Admin\OminiFlow\Onboarding_Shell;
 use WooCommerce\Facebook\Framework\Api\Exception as ApiException;
 use WooCommerce\Facebook\RolloutSwitches;
@@ -23,6 +24,7 @@ require_once __DIR__ . '/Localization_Settings_Trait.php';
 require_once __DIR__ . '/../OminiFlow/Auth_Config.php';
 require_once __DIR__ . '/../OminiFlow/Auth_Client.php';
 require_once __DIR__ . '/../OminiFlow/Auth_Gate.php';
+require_once __DIR__ . '/../OminiFlow/Branding.php';
 require_once __DIR__ . '/../OminiFlow/Onboarding_Shell.php';
 
 /**
@@ -87,8 +89,8 @@ class Shops extends Abstract_Settings_Screen {
 	 */
 	public function initHook(): void {
 		$this->id    = self::ID;
-		$this->label = __( 'Shops', 'facebook-for-woocommerce' );
-		$this->title = __( 'Shops', 'facebook-for-woocommerce' );
+		$this->label = __( 'Connect', 'facebook-for-woocommerce' );
+		$this->title = Branding::short_name() . ' — ' . __( 'Connect', 'facebook-for-woocommerce' );
 	}
 
 	/**
@@ -169,14 +171,21 @@ class Shops extends Abstract_Settings_Screen {
 		$connection_invalid    = (bool) get_transient( 'wc_facebook_connection_invalid' );
 		$show_management_iframe = ! empty( $merchant_access_token ) && $is_connected && ! $connection_invalid;
 
-		if ( ! $show_management_iframe ) {
-			wp_enqueue_style(
-				'wc-ominiflow-onboarding',
-				facebook_for_woocommerce()->get_plugin_url() . '/assets/css/admin/ominiflow-onboarding.css',
-				array(),
-				\WC_Facebookcommerce::VERSION
-			);
+		wp_enqueue_style(
+			'wc-ominiflow-onboarding',
+			facebook_for_woocommerce()->get_plugin_url() . '/assets/css/admin/ominiflow-onboarding.css',
+			array(),
+			\WC_Facebookcommerce::VERSION
+		);
 
+		wp_enqueue_style(
+			'wc-ominiflow-admin-branding',
+			facebook_for_woocommerce()->get_plugin_url() . '/assets/css/admin/ominiflow-admin-branding.css',
+			array( 'wc-ominiflow-onboarding' ),
+			\WC_Facebookcommerce::VERSION
+		);
+
+		if ( ! $show_management_iframe ) {
 			wp_enqueue_script(
 				'wc-ominiflow-onboarding',
 				facebook_for_woocommerce()->get_plugin_url() . '/assets/js/admin/ominiflow-onboarding.js',
@@ -246,7 +255,7 @@ class Shops extends Abstract_Settings_Screen {
 		$show_management_iframe = $has_merchant_token && $is_connected && ! $connection_invalid;
 
 		if ( $show_management_iframe ) {
-			Onboarding_Shell::render_connected_iframe( $iframe_url );
+			Onboarding_Shell::render_workspace( $iframe_url );
 			return;
 		}
 
@@ -255,7 +264,7 @@ class Shops extends Abstract_Settings_Screen {
 			return;
 		}
 
-		Onboarding_Shell::render_connected_iframe( $iframe_url );
+		Onboarding_Shell::render_workspace( $iframe_url );
 	}
 
 	/**

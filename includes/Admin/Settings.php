@@ -12,6 +12,8 @@ namespace WooCommerce\Facebook\Admin;
 
 use Automattic\WooCommerce\Admin\Features\Features as WooAdminFeatures;
 use WooCommerce\Facebook\Admin\Settings_Screens;
+use WooCommerce\Facebook\Admin\OminiFlow\Admin_Branding;
+use WooCommerce\Facebook\Admin\OminiFlow\Branding;
 use WooCommerce\Facebook\Framework\Helper;
 use WooCommerce\Facebook\Framework\Plugin\Exception as PluginException;
 use WooCommerce\Facebook\RolloutSwitches;
@@ -92,8 +94,8 @@ class Settings {
 
 		add_submenu_page(
 			$root_menu_item,
-			__( 'Meta for WooCommerce', 'facebook-for-woocommerce' ),
-			__( 'Facebook', 'facebook-for-woocommerce' ),
+			Branding::plugin_name(),
+			Branding::menu_label(),
 			'manage_woocommerce',
 			self::PAGE_ID,
 			[ $this, 'render' ],
@@ -145,7 +147,7 @@ class Settings {
 
 		if ( is_callable( 'wc_admin_connect_page' ) ) {
 			$crumbs = array(
-				__( 'Meta for WooCommerce', 'facebook-for-woocommerce' ),
+				Branding::plugin_name(),
 			);
 			//phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( ! empty( $_GET['tab'] ) ) {
@@ -184,6 +186,7 @@ class Settings {
 		$screen      = $this->get_screen( $current_tab );
 		?>
 		<div class="wrap woocommerce">
+			<?php Admin_Branding::render_settings_header(); ?>
 			<?php $this->render_tabs( $current_tab ); ?>
 			<?php facebook_for_woocommerce()->get_message_handler()->show_messages(); ?>
 			<?php if ( $screen ) : ?>

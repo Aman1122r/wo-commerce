@@ -12,6 +12,7 @@ namespace WooCommerce\Facebook\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use WooCommerce\Facebook\Admin\OminiFlow\Branding;
 use WooCommerce\Facebook\ProductAttributeMapper;
 
 /**
@@ -210,7 +211,7 @@ class Global_Attributes_Banner {
 		?>
 		<div class="notice notice-info is-dismissible fb-unmapped-attribute-banner" style="position: relative;">
 			<p>
-				<strong><?php esc_html_e( 'Meta for WooCommerce', 'facebook-for-woocommerce' ); ?></strong>
+				<strong><?php echo esc_html( Branding::plugin_name() ); ?></strong>
 			</p>
 			<p>
 				<?php
