@@ -14,6 +14,8 @@ use WooCommerce\Facebook\Framework\Logger;
 use WooCommerce\Facebook\Framework\Helper;
 use WooCommerce\Facebook\Admin\OminiFlow\Auth_Gate;
 use WooCommerce\Facebook\Admin\OminiFlow\Branding;
+use WooCommerce\Facebook\Admin\OminiFlow\Credential_Sync;
+use WooCommerce\Facebook\Admin\OminiFlow\Integrations_Config;
 use WooCommerce\Facebook\Admin\OminiFlow\Onboarding_Shell;
 use Automattic\WooCommerce\Admin\Features\Features as WooAdminFeatures;
 
@@ -241,6 +243,10 @@ class WhatsApp_Integration_Settings {
 	 * @since 3.5.0
 	 */
 	public function render() {
+		if ( Integrations_Config::is_credential_sync_enabled() ) {
+			Credential_Sync::maybe_sync_from_session();
+		}
+
 		$whatsapp_connection = $this->plugin->get_whatsapp_connection_handler();
 		$is_connected        = $whatsapp_connection->is_connected();
 

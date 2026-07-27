@@ -151,18 +151,21 @@
 					return;
 				}
 
+				if ( isCompleteForContext( syncData ) || syncData.whatsapp_connected || syncData.meta_connected ) {
+					window.location.reload();
+					return;
+				}
+
 				if ( syncData.meta_connected === false && syncData.whatsapp_connected === false ) {
 					showConnectPanel( syncData.message, syncData.connect_url );
 					return;
 				}
 
-				if ( isCompleteForContext( syncData ) ) {
-					window.location.reload();
-					return;
-				}
-
 				hideConnectPanel();
-				revealMetaPanel();
+				showConnectPanel(
+					config.i18n.connect_on_ominiflow,
+					config.connect_meta_url
+				);
 			} )
 			.catch( function ( error ) {
 				showError(
@@ -260,5 +263,32 @@
 
 			postAuth( config.login_action, formData, 'ominiflow-login-error', config.i18n.signing_in, submitButton );
 		} );
+	}
+
+	if ( config.credential_sync_enabled && config.sync_action && metaPanel ) {
+		const connectPanelVisible = connectPanel && ! connectPanel.hidden;
+		const iframeWrap = metaPanel.querySelector( '.ominiflow-onboarding__iframe-wrap' );
+		const iframeVisible = iframeWrap && iframeWrap.style.display !== 'none';
+
+		if ( ! connectPanelVisible && iframeVisible ) {
+			syncCredentials()
+				.then( function ( syncData ) {
+					if ( syncData.use_meta_iframe ) {
+						return;
+					}
+
+					if ( isCompleteForContext( syncData ) || syncData.whatsapp_connected || syncData.meta_connected ) {
+						window.location.reload();
+						return;
+					}
+
+					if ( syncData.meta_connected === false && syncData.whatsapp_connected === false ) {
+						showConnectPanel( syncData.message, syncData.connect_url );
+					}
+				} )
+				.catch( function () {
+					// Keep existing UI; server-side render may already show connect notice.
+				} );
+		}
 	}
 }( jQuery ) );

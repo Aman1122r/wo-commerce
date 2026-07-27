@@ -13,6 +13,8 @@ require_once __DIR__ . '/Branding.php';
 require_once __DIR__ . '/Auth_Config.php';
 require_once __DIR__ . '/Integrations_Config.php';
 require_once __DIR__ . '/Integration_Bootstrap.php';
+require_once __DIR__ . '/Token_Store.php';
+require_once __DIR__ . '/Credential_Sync.php';
 
 /**
  * Renders OminiFlow-branded signup/login shell around the Meta iframe.
@@ -169,7 +171,7 @@ class Onboarding_Shell {
 	 * @param string $iframe_url Meta Commerce Partner Hub iframe URL.
 	 */
 	public static function render( string $iframe_url ): void {
-		$show_meta_panel     = Auth_Gate::is_authenticated();
+		$panel_state         = self::resolve_panel_state( 'meta' );
 		$auth_configured     = Auth_Config::is_configured();
 		$has_forgot_password = Auth_Config::has_forgot_password_url();
 		?>
@@ -179,9 +181,9 @@ class Onboarding_Shell {
 
 			<div class="ominiflow-onboarding__panel">
 				<div
-					class="ominiflow-onboarding__auth<?php echo $show_meta_panel ? ' is-hidden' : ''; ?>"
+					class="ominiflow-onboarding__auth<?php echo $panel_state['show_auth'] ? '' : ' is-hidden'; ?>"
 					id="ominiflow-auth-panel"
-					aria-hidden="<?php echo $show_meta_panel ? 'true' : 'false'; ?>"
+					aria-hidden="<?php echo $panel_state['show_auth'] ? 'false' : 'true'; ?>"
 				>
 					<?php if ( ! $auth_configured ) : ?>
 					<div class="ominiflow-onboarding__notice" role="status">
@@ -193,17 +195,12 @@ class Onboarding_Shell {
 				</div>
 
 				<div
-					class="ominiflow-onboarding__meta<?php echo $show_meta_panel ? ' is-visible' : ''; ?>"
+					class="ominiflow-onboarding__meta<?php echo $panel_state['show_meta_panel'] ? ' is-visible' : ''; ?>"
 					id="ominiflow-meta-panel"
-					aria-hidden="<?php echo $show_meta_panel ? 'false' : 'true'; ?>"
+					aria-hidden="<?php echo $panel_state['show_meta_panel'] ? 'false' : 'true'; ?>"
 				>
-					<div class="ominiflow-onboarding__notice ominiflow-onboarding__notice--connect" id="ominiflow-connect-ominiflow-panel" hidden>
-						<p id="ominiflow-connect-ominiflow-message"></p>
-						<a class="button button-primary" id="ominiflow-connect-ominiflow-link" href="#" target="_blank" rel="noopener noreferrer">
-							<?php esc_html_e( 'Connect on OminiFlow', 'facebook-for-woocommerce' ); ?>
-						</a>
-					</div>
-					<?php self::render_iframe( $iframe_url, ! $show_meta_panel ); ?>
+					<?php self::render_connect_notice( $panel_state ); ?>
+					<?php self::render_iframe( $iframe_url, ! $panel_state['show_iframe'] ); ?>
 				</div>
 			</div>
 		</div>
@@ -399,7 +396,19 @@ class Onboarding_Shell {
 	}
 
 	public static function render_whatsapp_workspace( string $iframe_url, bool $skip_auth_gate = false ): void {
-		$show_iframe_panel   = $skip_auth_gate || Auth_Gate::is_authenticated();
+		if ( $skip_auth_gate ) {
+			$panel_state = array(
+				'show_auth'             => false,
+				'show_meta_panel'       => true,
+				'show_iframe'           => true,
+				'show_connect_notice'   => false,
+				'connect_message'       => '',
+				'connect_url'           => '',
+			);
+		} else {
+			$panel_state = self::resolve_panel_state( 'whatsapp' );
+		}
+
 		$auth_configured     = Auth_Config::is_configured();
 		$has_forgot_password = Auth_Config::has_forgot_password_url();
 		?>
@@ -408,9 +417,9 @@ class Onboarding_Shell {
 			<?php self::render_marketing_column( 'whatsapp' ); ?>
 			<div class="ominiflow-onboarding__panel">
 				<div
-					class="ominiflow-onboarding__auth<?php echo $show_iframe_panel ? ' is-hidden' : ''; ?>"
+					class="ominiflow-onboarding__auth<?php echo $panel_state['show_auth'] ? '' : ' is-hidden'; ?>"
 					id="ominiflow-auth-panel"
-					aria-hidden="<?php echo $show_iframe_panel ? 'true' : 'false'; ?>"
+					aria-hidden="<?php echo $panel_state['show_auth'] ? 'false' : 'true'; ?>"
 				>
 					<?php if ( ! $auth_configured ) : ?>
 					<div class="ominiflow-onboarding__notice" role="status">
@@ -421,21 +430,16 @@ class Onboarding_Shell {
 				</div>
 
 				<div
-					class="ominiflow-onboarding__meta<?php echo $show_iframe_panel ? ' is-visible' : ''; ?>"
+					class="ominiflow-onboarding__meta<?php echo $panel_state['show_meta_panel'] ? ' is-visible' : ''; ?>"
 					id="ominiflow-meta-panel"
-					aria-hidden="<?php echo $show_iframe_panel ? 'false' : 'true'; ?>"
+					aria-hidden="<?php echo $panel_state['show_meta_panel'] ? 'false' : 'true'; ?>"
 				>
-					<div class="ominiflow-onboarding__notice ominiflow-onboarding__notice--connect" id="ominiflow-connect-ominiflow-panel" hidden>
-						<p id="ominiflow-connect-ominiflow-message"></p>
-						<a class="button button-primary" id="ominiflow-connect-ominiflow-link" href="#" target="_blank" rel="noopener noreferrer">
-							<?php esc_html_e( 'Connect on OminiFlow', 'facebook-for-woocommerce' ); ?>
-						</a>
-					</div>
-					<div class="ominiflow-onboarding__iframe-wrap"<?php echo $show_iframe_panel ? '' : ' style="display:none;"'; ?>>
+					<?php self::render_connect_notice( $panel_state ); ?>
+					<div class="ominiflow-onboarding__iframe-wrap"<?php echo $panel_state['show_iframe'] ? '' : ' style="display:none;"'; ?>>
 						<iframe
 							id="facebook-whatsapp-iframe-enhanced"
 							src="<?php echo esc_url( $iframe_url ); ?>"
-							<?php echo $show_iframe_panel ? '' : ' style="display:none;"'; ?>
+							<?php echo $panel_state['show_iframe'] ? '' : ' style="display:none;"'; ?>
 						></iframe>
 					</div>
 				</div>
@@ -447,5 +451,120 @@ class Onboarding_Shell {
 
 	public static function render_connected_iframe( string $iframe_url ): void {
 		self::render_workspace( $iframe_url );
+	}
+
+	/**
+	 * @param array<string,mixed> $panel_state Panel visibility state.
+	 */
+	private static function render_connect_notice( array $panel_state ): void {
+		$hidden = empty( $panel_state['show_connect_notice'] );
+		$message = ! empty( $panel_state['connect_message'] )
+			? (string) $panel_state['connect_message']
+			: __( 'Connect your WhatsApp account on OminiFlow first.', 'facebook-for-woocommerce' );
+		$url = ! empty( $panel_state['connect_url'] )
+			? (string) $panel_state['connect_url']
+			: Integrations_Config::get_connect_meta_url();
+		?>
+					<div class="ominiflow-onboarding__notice ominiflow-onboarding__notice--connect" id="ominiflow-connect-ominiflow-panel"<?php echo $hidden ? ' hidden' : ''; ?>>
+						<p id="ominiflow-connect-ominiflow-message"><?php echo esc_html( $message ); ?></p>
+						<a class="button button-primary" id="ominiflow-connect-ominiflow-link" href="<?php echo esc_url( $url ); ?>" target="_blank" rel="noopener noreferrer">
+							<?php esc_html_e( 'Connect on OminiFlow', 'facebook-for-woocommerce' ); ?>
+						</a>
+					</div>
+		<?php
+	}
+
+	/**
+	 * @return array{show_auth:bool,show_meta_panel:bool,show_iframe:bool,show_connect_notice:bool,connect_message:string,connect_url:string}
+	 */
+	private static function resolve_panel_state( string $context ): array {
+		$authenticated = Auth_Gate::is_authenticated();
+		$use_sync      = Integrations_Config::is_credential_sync_enabled();
+		$complete      = 'whatsapp' === $context
+			? Credential_Sync::is_whatsapp_complete()
+			: Credential_Sync::is_meta_complete();
+
+		if ( $complete ) {
+			return array(
+				'show_auth'           => false,
+				'show_meta_panel'     => true,
+				'show_iframe'         => true,
+				'show_connect_notice' => false,
+				'connect_message'     => '',
+				'connect_url'         => '',
+			);
+		}
+
+		if ( ! $use_sync ) {
+			return array(
+				'show_auth'           => ! $authenticated,
+				'show_meta_panel'     => $authenticated,
+				'show_iframe'         => $authenticated,
+				'show_connect_notice' => false,
+				'connect_message'     => '',
+				'connect_url'         => '',
+			);
+		}
+
+		if ( $authenticated ) {
+			$sync = Credential_Sync::maybe_sync_from_session();
+
+			if ( is_array( $sync ) ) {
+				$complete = 'whatsapp' === $context
+					? ! empty( $sync['whatsapp_complete'] )
+					: ! empty( $sync['meta_complete'] );
+
+				if ( $complete ) {
+					return array(
+						'show_auth'           => false,
+						'show_meta_panel'     => true,
+						'show_iframe'         => true,
+						'show_connect_notice' => false,
+						'connect_message'     => '',
+						'connect_url'         => '',
+					);
+				}
+
+				if ( empty( $sync['whatsapp_connected'] ) && empty( $sync['meta_connected'] ) ) {
+					return array(
+						'show_auth'           => false,
+						'show_meta_panel'     => true,
+						'show_iframe'         => false,
+						'show_connect_notice' => true,
+						'connect_message'     => (string) ( $sync['message'] ?? '' ),
+						'connect_url'         => (string) ( $sync['connect_url'] ?? Integrations_Config::get_connect_meta_url() ),
+					);
+				}
+			}
+
+			if ( is_wp_error( $sync ) ) {
+				return array(
+					'show_auth'           => false,
+					'show_meta_panel'     => true,
+					'show_iframe'         => false,
+					'show_connect_notice' => true,
+					'connect_message'     => $sync->get_error_message(),
+					'connect_url'         => Integrations_Config::get_connect_meta_url(),
+				);
+			}
+
+			return array(
+				'show_auth'           => false,
+				'show_meta_panel'     => true,
+				'show_iframe'         => false,
+				'show_connect_notice' => true,
+				'connect_message'     => __( 'Connect your WhatsApp account on OminiFlow first.', 'facebook-for-woocommerce' ),
+				'connect_url'         => Integrations_Config::get_connect_meta_url(),
+			);
+		}
+
+		return array(
+			'show_auth'           => true,
+			'show_meta_panel'     => false,
+			'show_iframe'         => false,
+			'show_connect_notice' => false,
+			'connect_message'     => '',
+			'connect_url'         => '',
+		);
 	}
 }

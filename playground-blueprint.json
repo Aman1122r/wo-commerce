@@ -20,7 +20,7 @@
     },
     {
       "step": "activatePlugin",
-      "pluginPath": "facebook-for-woocommerce/facebook-for-woocommerce.php"
+      "pluginPath": "wo-commerce/facebook-for-woocommerce.php"
     }
   ]
 }

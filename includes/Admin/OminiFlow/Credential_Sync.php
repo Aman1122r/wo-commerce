@@ -177,12 +177,25 @@ class Credential_Sync {
 	}
 
 	public static function is_whatsapp_complete(): bool {
-		$token     = get_option( WhatsAppConnection::OPTION_WA_UTILITY_ACCESS_TOKEN, '' );
-		$waba_id   = get_option( WhatsAppConnection::OPTION_WA_WABA_ID, '' );
-		$phone_id  = get_option( WhatsAppConnection::OPTION_WA_PHONE_NUMBER_ID, '' );
+		$token = get_option( WhatsAppConnection::OPTION_WA_UTILITY_ACCESS_TOKEN, '' );
 
-		return is_string( $token ) && '' !== $token
-			&& is_string( $waba_id ) && '' !== $waba_id
-			&& is_string( $phone_id ) && '' !== $phone_id;
+		return is_string( $token ) && '' !== $token;
+	}
+
+	/**
+	 * Attempts credential sync when an OminiFlow session token exists.
+	 *
+	 * @return array<string,mixed>|\WP_Error|null Null when sync was skipped.
+	 */
+	public static function maybe_sync_from_session() {
+		if ( ! Integrations_Config::is_credential_sync_enabled() ) {
+			return null;
+		}
+
+		if ( '' === Token_Store::get_access_token() ) {
+			return null;
+		}
+
+		return self::fetch_and_apply();
 	}
 }
